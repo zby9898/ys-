@@ -30,14 +30,17 @@ classdef MatViewerTool < matlab.apps.AppBase
         
         % 控制按钮
         ImportBtn               matlab.ui.control.Button
-        WaveformBtn             matlab.ui.control.Button
-        OriginalBtn             matlab.ui.control.Button
-        DbBtn                   matlab.ui.control.Button
-        Mesh3DBtn               matlab.ui.control.Button
-        DbMesh3DBtn             matlab.ui.control.Button
-        SARBtn                  matlab.ui.control.Button
         AutoPlayBtn             matlab.ui.control.Button
         ExportBtn               matlab.ui.control.Button
+
+        % 右键菜单
+        ImageContextMenu        matlab.ui.container.ContextMenu
+        WaveformMenuItem        matlab.ui.container.Menu
+        OriginalMenuItem        matlab.ui.container.Menu
+        DbMenuItem              matlab.ui.container.Menu
+        Mesh3DMenuItem          matlab.ui.container.Menu
+        DbMesh3DMenuItem        matlab.ui.container.Menu
+        SARMenuItem             matlab.ui.container.Menu
         
         % 滑动条和帧控制
         FrameSlider             matlab.ui.control.Slider
@@ -475,61 +478,19 @@ classdef MatViewerTool < matlab.apps.AppBase
             imgLayout.RowSpacing = 3;
             
             % ========== 第1行：功能按钮 ==========
-            btnLayout1 = uigridlayout(imgLayout, [1, 8]);
-            btnLayout1.ColumnWidth = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', '1x'};
+            btnLayout1 = uigridlayout(imgLayout, [1, 2]);
+            btnLayout1.ColumnWidth = {'fit', '1x'};
             btnLayout1.Layout.Row = 1;
             btnLayout1.Layout.Column = 1;
             btnLayout1.Padding = [5 2 5 2];
             btnLayout1.ColumnSpacing = 3;
-            
+
             app.ImportBtn = uibutton(btnLayout1, 'push');
             app.ImportBtn.Text = '导入选中实验数据';
             app.ImportBtn.Layout.Row = 1;
             app.ImportBtn.Layout.Column = 1;
             app.ImportBtn.ButtonPushedFcn = @(~,~) importFiles(app);
-            
-            app.WaveformBtn = uibutton(btnLayout1, 'push');
-            app.WaveformBtn.Text = '时域波形图';
-            app.WaveformBtn.Enable = 'off';
-            app.WaveformBtn.Layout.Row = 1;
-            app.WaveformBtn.Layout.Column = 2;
-            app.WaveformBtn.ButtonPushedFcn = @(~,~) showTimeWaveform(app);
-            
-            app.OriginalBtn = uibutton(btnLayout1, 'push');
-            app.OriginalBtn.Text = '原图放大';
-            app.OriginalBtn.Enable = 'off';
-            app.OriginalBtn.Layout.Row = 1;
-            app.OriginalBtn.Layout.Column = 3;
-            app.OriginalBtn.ButtonPushedFcn = @(~,~) showOriginalImage(app);
-            
-            app.DbBtn = uibutton(btnLayout1, 'push');
-            app.DbBtn.Text = '原图dB放大';
-            app.DbBtn.Enable = 'off';
-            app.DbBtn.Layout.Row = 1;
-            app.DbBtn.Layout.Column = 4;
-            app.DbBtn.ButtonPushedFcn = @(~,~) showDbImage(app);
-            
-            app.Mesh3DBtn = uibutton(btnLayout1, 'push');
-            app.Mesh3DBtn.Text = '3D图像放大';
-            app.Mesh3DBtn.Enable = 'off';
-            app.Mesh3DBtn.Layout.Row = 1;
-            app.Mesh3DBtn.Layout.Column = 5;
-            app.Mesh3DBtn.ButtonPushedFcn = @(~,~) show3DMesh(app);
-            
-            app.DbMesh3DBtn = uibutton(btnLayout1, 'push');
-            app.DbMesh3DBtn.Text = '3D图像dB放大';
-            app.DbMesh3DBtn.Enable = 'off';
-            app.DbMesh3DBtn.Layout.Row = 1;
-            app.DbMesh3DBtn.Layout.Column = 6;
-            app.DbMesh3DBtn.ButtonPushedFcn = @(~,~) showDb3DMesh(app);
-            
-            app.SARBtn = uibutton(btnLayout1, 'push');
-            app.SARBtn.Text = 'SAR图';
-            app.SARBtn.Enable = 'off';
-            app.SARBtn.Layout.Row = 1;
-            app.SARBtn.Layout.Column = 7;
-            app.SARBtn.ButtonPushedFcn = @(~,~) showSARImage(app);
-        
+
             % 状态标签
             app.StatusLabel = uilabel(btnLayout1);
             app.StatusLabel.Text = '请选择具体实验';
@@ -537,7 +498,7 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.StatusLabel.FontWeight = 'bold';
             app.StatusLabel.HorizontalAlignment = 'right';
             app.StatusLabel.Layout.Row = 1;
-            app.StatusLabel.Layout.Column = 8;
+            app.StatusLabel.Layout.Column = 2;
             
             % ========== 第2行：预处理控制栏 ==========
             createPreprocessingControlBar(app, imgLayout);
@@ -616,6 +577,46 @@ classdef MatViewerTool < matlab.apps.AppBase
             
             % 保持向后兼容
             app.ImageAxes = app.ImageAxes1;
+
+            % ========== 创建右键菜单 ==========
+            app.ImageContextMenu = uicontextmenu(app.UIFigure);
+
+            % 创建菜单项
+            app.WaveformMenuItem = uimenu(app.ImageContextMenu);
+            app.WaveformMenuItem.Text = '时域波形图';
+            app.WaveformMenuItem.Enable = 'off';
+            app.WaveformMenuItem.MenuSelectedFcn = @(~,~) showTimeWaveform(app);
+
+            app.OriginalMenuItem = uimenu(app.ImageContextMenu);
+            app.OriginalMenuItem.Text = '原图放大';
+            app.OriginalMenuItem.Enable = 'off';
+            app.OriginalMenuItem.MenuSelectedFcn = @(~,~) showOriginalImage(app);
+
+            app.DbMenuItem = uimenu(app.ImageContextMenu);
+            app.DbMenuItem.Text = '原图dB放大';
+            app.DbMenuItem.Enable = 'off';
+            app.DbMenuItem.MenuSelectedFcn = @(~,~) showDbImage(app);
+
+            app.Mesh3DMenuItem = uimenu(app.ImageContextMenu);
+            app.Mesh3DMenuItem.Text = '3D图像放大';
+            app.Mesh3DMenuItem.Enable = 'off';
+            app.Mesh3DMenuItem.MenuSelectedFcn = @(~,~) show3DMesh(app);
+
+            app.DbMesh3DMenuItem = uimenu(app.ImageContextMenu);
+            app.DbMesh3DMenuItem.Text = '3D图像dB放大';
+            app.DbMesh3DMenuItem.Enable = 'off';
+            app.DbMesh3DMenuItem.MenuSelectedFcn = @(~,~) showDb3DMesh(app);
+
+            app.SARMenuItem = uimenu(app.ImageContextMenu);
+            app.SARMenuItem.Text = 'SAR图';
+            app.SARMenuItem.Enable = 'off';
+            app.SARMenuItem.MenuSelectedFcn = @(~,~) showSARImage(app);
+
+            % 将右键菜单绑定到所有显示区域
+            app.ImageAxes1.ContextMenu = app.ImageContextMenu;
+            app.ImageAxes2.ContextMenu = app.ImageContextMenu;
+            app.ImageAxes3.ContextMenu = app.ImageContextMenu;
+            app.ImageAxes4.ContextMenu = app.ImageContextMenu;
 
             % ⭐ 创建浮动的关闭按钮（父容器是 MultiViewPanel，不是 gridlayout，按钮会浮动在坐标轴上方
             
@@ -1564,7 +1565,7 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.FrameSlider.Value = 1;
             displayCurrentImage(app);  % 这一行不要误删
             updateFrameInfoDisplay(app);
-            updateDisplayButtonsState(app);
+            updateContextMenuState(app);
             updateImageInfoDisplay(app);
 
             % 创建字段复选框
@@ -2298,54 +2299,54 @@ classdef MatViewerTool < matlab.apps.AppBase
             end
         end
         
-        function updateDisplayButtonsState(app)
-            % 根据当前帧数据类型更新按钮状态
+        function updateContextMenuState(app)
+            % 根据当前帧数据类型更新右键菜单状态
             if isempty(app.MatData) || app.CurrentIndex > length(app.MatData)
-                % 没有数据时，所有按钮禁用
-                app.WaveformBtn.Enable = 'off';
-                app.OriginalBtn.Enable = 'off';
-                app.DbBtn.Enable = 'off';
-                app.Mesh3DBtn.Enable = 'off';
-                app.DbMesh3DBtn.Enable = 'off';
-                app.SARBtn.Enable = 'off';
+                % 没有数据时，所有菜单项禁用
+                app.WaveformMenuItem.Enable = 'off';
+                app.OriginalMenuItem.Enable = 'off';
+                app.DbMenuItem.Enable = 'off';
+                app.Mesh3DMenuItem.Enable = 'off';
+                app.DbMesh3DMenuItem.Enable = 'off';
+                app.SARMenuItem.Enable = 'off';
                 return;
             end
-            
+
             % 判断文件名是否为SAR
             [~, filename] = fileparts(app.MatFiles{app.CurrentIndex});
             isSAR = startsWith(lower(filename), 'sar');
-            
+
             % 获取当前矩阵
             data = app.MatData{app.CurrentIndex};
             complexMatrix = data.complex_matrix;
             isVector = isvector(complexMatrix);
-            
+
             if isSAR
-                % ===== 第一类：SAR文件 - 只有SAR图按钮可用 =====
-                app.WaveformBtn.Enable = 'off';
-                app.OriginalBtn.Enable = 'off';
-                app.DbBtn.Enable = 'off';
-                app.Mesh3DBtn.Enable = 'off';
-                app.DbMesh3DBtn.Enable = 'off';
-                app.SARBtn.Enable = 'on';
-                
+                % ===== 第一类：SAR文件 - 只有SAR图菜单可用 =====
+                app.WaveformMenuItem.Enable = 'off';
+                app.OriginalMenuItem.Enable = 'off';
+                app.DbMenuItem.Enable = 'off';
+                app.Mesh3DMenuItem.Enable = 'off';
+                app.DbMesh3DMenuItem.Enable = 'off';
+                app.SARMenuItem.Enable = 'on';
+
             elseif isVector
                 % ===== 第二类：向量数据 - 只有时域波形图可用 =====
-                app.WaveformBtn.Enable = 'on';
-                app.OriginalBtn.Enable = 'off';
-                app.DbBtn.Enable = 'off';
-                app.Mesh3DBtn.Enable = 'off';
-                app.DbMesh3DBtn.Enable = 'off';
-                app.SARBtn.Enable = 'off';
-                
+                app.WaveformMenuItem.Enable = 'on';
+                app.OriginalMenuItem.Enable = 'off';
+                app.DbMenuItem.Enable = 'off';
+                app.Mesh3DMenuItem.Enable = 'off';
+                app.DbMesh3DMenuItem.Enable = 'off';
+                app.SARMenuItem.Enable = 'off';
+
             else
-                % ===== 第三类：矩阵数据 - 原图和3D按钮可用 =====
-                app.WaveformBtn.Enable = 'off';
-                app.OriginalBtn.Enable = 'on';
-                app.DbBtn.Enable = 'on';
-                app.Mesh3DBtn.Enable = 'on';
-                app.DbMesh3DBtn.Enable = 'on';
-                app.SARBtn.Enable = 'off';
+                % ===== 第三类：矩阵数据 - 原图和3D菜单可用 =====
+                app.WaveformMenuItem.Enable = 'off';
+                app.OriginalMenuItem.Enable = 'on';
+                app.DbMenuItem.Enable = 'on';
+                app.Mesh3DMenuItem.Enable = 'on';
+                app.DbMesh3DMenuItem.Enable = 'on';
+                app.SARMenuItem.Enable = 'off';
             end
         end
         
@@ -2356,7 +2357,7 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.CurrentIndex = round(event.Value);
             displayCurrentImage(app);
             updateFrameInfoDisplay(app);
-            updateDisplayButtonsState(app);
+            updateContextMenuState(app);
             updateImageInfoDisplay(app);  % 更新图像信息显示
         end
         
@@ -2367,7 +2368,7 @@ classdef MatViewerTool < matlab.apps.AppBase
                 app.FrameSlider.Value = app.CurrentIndex;
                 displayCurrentImage(app);
                 updateFrameInfoDisplay(app);
-                updateDisplayButtonsState(app);
+                updateContextMenuState(app);
                 updateImageInfoDisplay(app);  % 更新图像信息显示
             end
         end
@@ -2384,7 +2385,7 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.FrameSlider.Value = app.CurrentIndex;
             displayCurrentImage(app);
             updateFrameInfoDisplay(app);
-            updateDisplayButtonsState(app);
+            updateContextMenuState(app);
             updateImageInfoDisplay(app);  % 更新图像信息显示
         end
         
@@ -2456,7 +2457,7 @@ classdef MatViewerTool < matlab.apps.AppBase
                 app.FrameSlider.Value = targetIndex;
                 displayCurrentImage(app);
                 updateFrameInfoDisplay(app);
-                updateDisplayButtonsState(app);
+                updateContextMenuState(app);
                 updateImageInfoDisplay(app);
                 
                 % 暂时移除回调，避免清空输入框时触发
@@ -2526,7 +2527,7 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.FrameSlider.Value = app.CurrentIndex;
             displayCurrentImage(app);
             updateFrameInfoDisplay(app);
-            updateDisplayButtonsState(app);
+            updateContextMenuState(app);
             updateImageInfoDisplay(app);  % 更新图像信息
         end
         
