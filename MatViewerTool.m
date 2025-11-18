@@ -103,13 +103,21 @@ classdef MatViewerTool < matlab.apps.AppBase
         ClearPrepBtn            matlab.ui.control.Button
         
         % 多视图显示
+        ViewPanel1              matlab.ui.container.Panel
+        ViewPanel2              matlab.ui.container.Panel
+        ViewPanel3              matlab.ui.container.Panel
+        ViewPanel4              matlab.ui.container.Panel
         ImageAxes1              matlab.ui.control.UIAxes
         ImageAxes2              matlab.ui.control.UIAxes
         ImageAxes3              matlab.ui.control.UIAxes
         ImageAxes4              matlab.ui.control.UIAxes
-        CloseBtn2               matlab.ui.control.Button  % 添加
-        CloseBtn3               matlab.ui.control.Button  % 添加
-        CloseBtn4               matlab.ui.control.Button  % 添加
+        MenuBtn1                matlab.ui.control.Button
+        MenuBtn2                matlab.ui.control.Button
+        MenuBtn3                matlab.ui.control.Button
+        MenuBtn4                matlab.ui.control.Button
+        CloseBtn2               matlab.ui.control.Button
+        CloseBtn3               matlab.ui.control.Button
+        CloseBtn4               matlab.ui.control.Button
         MultiViewPanel          matlab.ui.container.Panel        
     end
     
@@ -543,38 +551,226 @@ classdef MatViewerTool < matlab.apps.AppBase
             multiViewLayout.RowSpacing = 3;
             multiViewLayout.ColumnSpacing = 3;
             
-            % 创建4个子图区域
-            app.ImageAxes1 = uiaxes(multiViewLayout);
-            app.ImageAxes1.Layout.Row = 1;
+            % ========== 创建显示区1（带标题栏）==========
+            app.ViewPanel1 = uipanel(multiViewLayout);
+            app.ViewPanel1.BorderType = 'none';
+            app.ViewPanel1.Layout.Row = 1;
+            app.ViewPanel1.Layout.Column = 1;
+
+            viewLayout1 = uigridlayout(app.ViewPanel1, [2, 1]);
+            viewLayout1.RowHeight = {25, '1x'};  % 标题栏25px，图像区弹性
+            viewLayout1.Padding = [0 0 0 0];
+            viewLayout1.RowSpacing = 0;
+
+            % 标题栏1
+            titleBar1 = uigridlayout(viewLayout1, [1, 3]);
+            titleBar1.ColumnWidth = {'fit', '1x', 'fit'};
+            titleBar1.Layout.Row = 1;
+            titleBar1.Layout.Column = 1;
+            titleBar1.Padding = [3 2 3 2];
+            titleBar1.BackgroundColor = [0.94 0.94 0.94];
+
+            app.MenuBtn1 = uibutton(titleBar1, 'push');
+            app.MenuBtn1.Text = '☰';
+            app.MenuBtn1.FontSize = 12;
+            app.MenuBtn1.FontWeight = 'bold';
+            app.MenuBtn1.BackgroundColor = [0.3 0.6 0.9];
+            app.MenuBtn1.FontColor = [1 1 1];
+            app.MenuBtn1.Layout.Row = 1;
+            app.MenuBtn1.Layout.Column = 1;
+            app.MenuBtn1.Tooltip = '图像操作菜单';
+            app.MenuBtn1.ButtonPushedFcn = createCallbackFcn(app, @(src,~)showImageMenu(app, src), true);
+
+            titleLabel1 = uilabel(titleBar1);
+            titleLabel1.Text = '原图';
+            titleLabel1.FontSize = 11;
+            titleLabel1.FontWeight = 'bold';
+            titleLabel1.HorizontalAlignment = 'left';
+            titleLabel1.Layout.Row = 1;
+            titleLabel1.Layout.Column = 2;
+
+            % 图像区1
+            app.ImageAxes1 = uiaxes(viewLayout1);
+            app.ImageAxes1.Layout.Row = 2;
             app.ImageAxes1.Layout.Column = 1;
             app.ImageAxes1.XTick = [];
             app.ImageAxes1.YTick = [];
             app.ImageAxes1.Box = 'on';
-            
-            app.ImageAxes2 = uiaxes(multiViewLayout);
-            app.ImageAxes2.Layout.Row = 1;
-            app.ImageAxes2.Layout.Column = 2;
+
+            % ========== 创建显示区2（带标题栏）==========
+            app.ViewPanel2 = uipanel(multiViewLayout);
+            app.ViewPanel2.BorderType = 'none';
+            app.ViewPanel2.Layout.Row = 1;
+            app.ViewPanel2.Layout.Column = 2;
+            app.ViewPanel2.Visible = 'off';
+
+            viewLayout2 = uigridlayout(app.ViewPanel2, [2, 1]);
+            viewLayout2.RowHeight = {25, '1x'};
+            viewLayout2.Padding = [0 0 0 0];
+            viewLayout2.RowSpacing = 0;
+
+            % 标题栏2
+            titleBar2 = uigridlayout(viewLayout2, [1, 3]);
+            titleBar2.ColumnWidth = {'fit', '1x', 'fit'};
+            titleBar2.Layout.Row = 1;
+            titleBar2.Layout.Column = 1;
+            titleBar2.Padding = [3 2 3 2];
+            titleBar2.BackgroundColor = [0.94 0.94 0.94];
+
+            app.MenuBtn2 = uibutton(titleBar2, 'push');
+            app.MenuBtn2.Text = '☰';
+            app.MenuBtn2.FontSize = 12;
+            app.MenuBtn2.FontWeight = 'bold';
+            app.MenuBtn2.BackgroundColor = [0.3 0.6 0.9];
+            app.MenuBtn2.FontColor = [1 1 1];
+            app.MenuBtn2.Layout.Row = 1;
+            app.MenuBtn2.Layout.Column = 1;
+            app.MenuBtn2.Tooltip = '图像操作菜单';
+            app.MenuBtn2.ButtonPushedFcn = createCallbackFcn(app, @(src,~)showImageMenu(app, src), true);
+
+            titleLabel2 = uilabel(titleBar2);
+            titleLabel2.Text = '预处理2';
+            titleLabel2.FontSize = 11;
+            titleLabel2.FontWeight = 'bold';
+            titleLabel2.HorizontalAlignment = 'left';
+            titleLabel2.Layout.Row = 1;
+            titleLabel2.Layout.Column = 2;
+
+            app.CloseBtn2 = uibutton(titleBar2, 'push');
+            app.CloseBtn2.Text = '✕';
+            app.CloseBtn2.FontSize = 12;
+            app.CloseBtn2.FontWeight = 'bold';
+            app.CloseBtn2.BackgroundColor = [0.9 0.3 0.3];
+            app.CloseBtn2.FontColor = [1 1 1];
+            app.CloseBtn2.Layout.Row = 1;
+            app.CloseBtn2.Layout.Column = 3;
+            app.CloseBtn2.Tooltip = '关闭此视图';
+            app.CloseBtn2.ButtonPushedFcn = createCallbackFcn(app, @(~,~)closeSubView(app, 2), true);
+
+            % 图像区2
+            app.ImageAxes2 = uiaxes(viewLayout2);
+            app.ImageAxes2.Layout.Row = 2;
+            app.ImageAxes2.Layout.Column = 1;
             app.ImageAxes2.XTick = [];
             app.ImageAxes2.YTick = [];
             app.ImageAxes2.Box = 'on';
-            app.ImageAxes2.Visible = 'off';
-            
-            app.ImageAxes3 = uiaxes(multiViewLayout);
+
+            % ========== 创建显示区3（带标题栏）==========
+            app.ViewPanel3 = uipanel(multiViewLayout);
+            app.ViewPanel3.BorderType = 'none';
+            app.ViewPanel3.Layout.Row = 2;
+            app.ViewPanel3.Layout.Column = 1;
+            app.ViewPanel3.Visible = 'off';
+
+            viewLayout3 = uigridlayout(app.ViewPanel3, [2, 1]);
+            viewLayout3.RowHeight = {25, '1x'};
+            viewLayout3.Padding = [0 0 0 0];
+            viewLayout3.RowSpacing = 0;
+
+            % 标题栏3
+            titleBar3 = uigridlayout(viewLayout3, [1, 3]);
+            titleBar3.ColumnWidth = {'fit', '1x', 'fit'};
+            titleBar3.Layout.Row = 1;
+            titleBar3.Layout.Column = 1;
+            titleBar3.Padding = [3 2 3 2];
+            titleBar3.BackgroundColor = [0.94 0.94 0.94];
+
+            app.MenuBtn3 = uibutton(titleBar3, 'push');
+            app.MenuBtn3.Text = '☰';
+            app.MenuBtn3.FontSize = 12;
+            app.MenuBtn3.FontWeight = 'bold';
+            app.MenuBtn3.BackgroundColor = [0.3 0.6 0.9];
+            app.MenuBtn3.FontColor = [1 1 1];
+            app.MenuBtn3.Layout.Row = 1;
+            app.MenuBtn3.Layout.Column = 1;
+            app.MenuBtn3.Tooltip = '图像操作菜单';
+            app.MenuBtn3.ButtonPushedFcn = createCallbackFcn(app, @(src,~)showImageMenu(app, src), true);
+
+            titleLabel3 = uilabel(titleBar3);
+            titleLabel3.Text = '预处理3';
+            titleLabel3.FontSize = 11;
+            titleLabel3.FontWeight = 'bold';
+            titleLabel3.HorizontalAlignment = 'left';
+            titleLabel3.Layout.Row = 1;
+            titleLabel3.Layout.Column = 2;
+
+            app.CloseBtn3 = uibutton(titleBar3, 'push');
+            app.CloseBtn3.Text = '✕';
+            app.CloseBtn3.FontSize = 12;
+            app.CloseBtn3.FontWeight = 'bold';
+            app.CloseBtn3.BackgroundColor = [0.9 0.3 0.3];
+            app.CloseBtn3.FontColor = [1 1 1];
+            app.CloseBtn3.Layout.Row = 1;
+            app.CloseBtn3.Layout.Column = 3;
+            app.CloseBtn3.Tooltip = '关闭此视图';
+            app.CloseBtn3.ButtonPushedFcn = createCallbackFcn(app, @(~,~)closeSubView(app, 3), true);
+
+            % 图像区3
+            app.ImageAxes3 = uiaxes(viewLayout3);
             app.ImageAxes3.Layout.Row = 2;
             app.ImageAxes3.Layout.Column = 1;
             app.ImageAxes3.XTick = [];
             app.ImageAxes3.YTick = [];
             app.ImageAxes3.Box = 'on';
-            app.ImageAxes3.Visible = 'off';
-            
-            app.ImageAxes4 = uiaxes(multiViewLayout);
+
+            % ========== 创建显示区4（带标题栏）==========
+            app.ViewPanel4 = uipanel(multiViewLayout);
+            app.ViewPanel4.BorderType = 'none';
+            app.ViewPanel4.Layout.Row = 2;
+            app.ViewPanel4.Layout.Column = 2;
+            app.ViewPanel4.Visible = 'off';
+
+            viewLayout4 = uigridlayout(app.ViewPanel4, [2, 1]);
+            viewLayout4.RowHeight = {25, '1x'};
+            viewLayout4.Padding = [0 0 0 0];
+            viewLayout4.RowSpacing = 0;
+
+            % 标题栏4
+            titleBar4 = uigridlayout(viewLayout4, [1, 3]);
+            titleBar4.ColumnWidth = {'fit', '1x', 'fit'};
+            titleBar4.Layout.Row = 1;
+            titleBar4.Layout.Column = 1;
+            titleBar4.Padding = [3 2 3 2];
+            titleBar4.BackgroundColor = [0.94 0.94 0.94];
+
+            app.MenuBtn4 = uibutton(titleBar4, 'push');
+            app.MenuBtn4.Text = '☰';
+            app.MenuBtn4.FontSize = 12;
+            app.MenuBtn4.FontWeight = 'bold';
+            app.MenuBtn4.BackgroundColor = [0.3 0.6 0.9];
+            app.MenuBtn4.FontColor = [1 1 1];
+            app.MenuBtn4.Layout.Row = 1;
+            app.MenuBtn4.Layout.Column = 1;
+            app.MenuBtn4.Tooltip = '图像操作菜单';
+            app.MenuBtn4.ButtonPushedFcn = createCallbackFcn(app, @(src,~)showImageMenu(app, src), true);
+
+            titleLabel4 = uilabel(titleBar4);
+            titleLabel4.Text = '预处理4';
+            titleLabel4.FontSize = 11;
+            titleLabel4.FontWeight = 'bold';
+            titleLabel4.HorizontalAlignment = 'left';
+            titleLabel4.Layout.Row = 1;
+            titleLabel4.Layout.Column = 2;
+
+            app.CloseBtn4 = uibutton(titleBar4, 'push');
+            app.CloseBtn4.Text = '✕';
+            app.CloseBtn4.FontSize = 12;
+            app.CloseBtn4.FontWeight = 'bold';
+            app.CloseBtn4.BackgroundColor = [0.9 0.3 0.3];
+            app.CloseBtn4.FontColor = [1 1 1];
+            app.CloseBtn4.Layout.Row = 1;
+            app.CloseBtn4.Layout.Column = 3;
+            app.CloseBtn4.Tooltip = '关闭此视图';
+            app.CloseBtn4.ButtonPushedFcn = createCallbackFcn(app, @(~,~)closeSubView(app, 4), true);
+
+            % 图像区4
+            app.ImageAxes4 = uiaxes(viewLayout4);
             app.ImageAxes4.Layout.Row = 2;
-            app.ImageAxes4.Layout.Column = 2;
+            app.ImageAxes4.Layout.Column = 1;
             app.ImageAxes4.XTick = [];
             app.ImageAxes4.YTick = [];
             app.ImageAxes4.Box = 'on';
-            app.ImageAxes4.Visible = 'off';
-            
+
             % 保持向后兼容
             app.ImageAxes = app.ImageAxes1;
 
@@ -612,53 +808,7 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.SARMenuItem.Enable = 'off';
             app.SARMenuItem.MenuSelectedFcn = @(~,~) showSARImage(app);
 
-            % 将右键菜单绑定到所有显示区域
-            app.ImageAxes1.ContextMenu = app.ImageContextMenu;
-            app.ImageAxes2.ContextMenu = app.ImageContextMenu;
-            app.ImageAxes3.ContextMenu = app.ImageContextMenu;
-            app.ImageAxes4.ContextMenu = app.ImageContextMenu;
 
-            % ⭐ 创建浮动的关闭按钮（父容器是 MultiViewPanel，不是 gridlayout，按钮会浮动在坐标轴上方
-            
-            % 关闭按钮2
-            app.CloseBtn2 = uibutton(app.MultiViewPanel, 'push');
-            app.CloseBtn2.Text = '✕';
-            app.CloseBtn2.FontSize = 14;
-            app.CloseBtn2.FontWeight = 'bold';
-            app.CloseBtn2.BackgroundColor = [1 0.95 0.95];
-            app.CloseBtn2.FontColor = [0.8 0 0];
-            app.CloseBtn2.Position = [10 10 30 25];  % 临时位置，后续会动态调整
-            app.CloseBtn2.Visible = 'off';
-            app.CloseBtn2.Tooltip = '关闭此视图';
-            app.CloseBtn2.ButtonPushedFcn = createCallbackFcn(app, @(~,~)closeSubView(app, 2), true);
-            
-            % 关闭按钮3
-            app.CloseBtn3 = uibutton(app.MultiViewPanel, 'push');
-            app.CloseBtn3.Text = '✕';
-            app.CloseBtn3.FontSize = 14;
-            app.CloseBtn3.FontWeight = 'bold';
-            app.CloseBtn3.BackgroundColor = [1 0.95 0.95];
-            app.CloseBtn3.FontColor = [0.8 0 0];
-            app.CloseBtn3.Position = [10 10 30 25];
-            app.CloseBtn3.Visible = 'off';
-            app.CloseBtn3.Tooltip = '关闭此视图';
-            app.CloseBtn3.ButtonPushedFcn = createCallbackFcn(app, @(~,~)closeSubView(app, 3), true);
-            
-            % 关闭按钮4
-            app.CloseBtn4 = uibutton(app.MultiViewPanel, 'push');
-            app.CloseBtn4.Text = '✕';
-            app.CloseBtn4.FontSize = 14;
-            app.CloseBtn4.FontWeight = 'bold';
-            app.CloseBtn4.BackgroundColor = [1 0.95 0.95];
-            app.CloseBtn4.FontColor = [0.8 0 0];
-            app.CloseBtn4.Position = [10 10 30 25];
-            app.CloseBtn4.Visible = 'off';
-            app.CloseBtn4.Tooltip = '关闭此视图';
-            app.CloseBtn4.ButtonPushedFcn = createCallbackFcn(app, @(~,~)closeSubView(app, 4), true);
-            
-            % 监听面板大小变化，动态调整按钮位置
-            app.MultiViewPanel.SizeChangedFcn = createCallbackFcn(app, @(src, event)updateCloseButtonPositions(app), true);
-            
             % ========== 第5行：帧控制区 ==========
             createFrameControlArea(app, imgLayout);
         end
@@ -1733,9 +1883,9 @@ classdef MatViewerTool < matlab.apps.AppBase
             
             % === 关键：重置所有axes的布局 ===
             % 隐藏其他axes
-            app.ImageAxes2.Visible = 'off';
-            app.ImageAxes3.Visible = 'off';
-            app.ImageAxes4.Visible = 'off';
+            app.ViewPanel2.Visible = 'off';
+            app.ViewPanel3.Visible = 'off';
+            app.ViewPanel4.Visible = 'off';
             
             % 显示并重置ImageAxes1占满整个区域
             app.ImageAxes1.Visible = 'on';
@@ -5236,9 +5386,9 @@ classdef MatViewerTool < matlab.apps.AppBase
             
             % 默认隐藏所有视图
             app.ImageAxes1.Visible = 'off';
-            app.ImageAxes2.Visible = 'off';
-            app.ImageAxes3.Visible = 'off';
-            app.ImageAxes4.Visible = 'off';
+            app.ViewPanel2.Visible = 'off';
+            app.ViewPanel3.Visible = 'off';
+            app.ViewPanel4.Visible = 'off';
             
             % 统计需要显示的视图
             views = [];
@@ -5322,8 +5472,6 @@ classdef MatViewerTool < matlab.apps.AppBase
                         displayImageInAxes(app, ax, viewIdx);
                     end
             end
-            % 更新关闭按钮位置
-            updateCloseButtonPositions(app);    
         end
         
         function displayImageInAxes(app, ax, viewIndex)
@@ -6224,15 +6372,15 @@ classdef MatViewerTool < matlab.apps.AppBase
             % 隐藏视图
             switch axesIndex
                 case 2
-                    app.ImageAxes2.Visible = 'off';
+                    app.ViewPanel2.Visible = 'off';
                     app.CloseBtn2.Visible = 'off';
                     cla(app.ImageAxes2);
                 case 3
-                    app.ImageAxes3.Visible = 'off';
+                    app.ViewPanel3.Visible = 'off';
                     app.CloseBtn3.Visible = 'off';
                     cla(app.ImageAxes3);
                 case 4
-                    app.ImageAxes4.Visible = 'off';
+                    app.ViewPanel4.Visible = 'off';
                     app.CloseBtn4.Visible = 'off';
                     cla(app.ImageAxes4);
             end
@@ -6244,50 +6392,30 @@ classdef MatViewerTool < matlab.apps.AppBase
         function handleAxesClick(app, src, event, viewIndex)
             % 处理坐标轴点击事件
             % 只有右键点击才关闭视图
-            
+
             if strcmp(event.Button, 'alt')  % 右键
                 closeSubView(app, viewIndex);
             end
         end
 
-        function updateCloseButtonPositions(app)
-            % 动态更新关闭按钮的位置（根据 UIAxes 的位置）
-            
-            % 如果按钮不存在，直接返回
-            if ~isvalid(app.CloseBtn2) || ~isvalid(app.CloseBtn3) || ~isvalid(app.CloseBtn4)
-                return;
-            end
-            
-            % 定义按钮大小
-            btnWidth = 10;
-            btnHeight = 10;
-            margin = 5;  % 距离坐标轴右上角的距离
-            
-            % 为每个可见的 Axes 计算按钮位置
-            axesList = {app.ImageAxes2, app.ImageAxes3, app.ImageAxes4};
-            btnList = {app.CloseBtn2, app.CloseBtn3, app.CloseBtn4};
-            
-            for i = 1:3
-                ax = axesList{i};
-                btn = btnList{i};
-                
-                if strcmp(ax.Visible, 'on')
-                    % 获取坐标轴在面板中的像素位置
-                    axPos = getpixelposition(ax, true);  % 相对于父容器
-                    
-                    % 计算按钮位置（右上角）
-                    btnX = axPos(1) + axPos(3) - btnWidth - margin;
-                    btnY = axPos(2) + axPos(4) - btnHeight - margin;
-                    
-                    btn.Position = [btnX, btnY, btnWidth, btnHeight];
-                    btn.Visible = 'on';
-                    % 将按钮提到最前面（确保不被 GridLayout 遮挡）
-                    % uistack(btn, 'top'); 但是显示位置一直调不好 算了
+        function showImageMenu(app, src)
+            % 显示图像操作菜单
+            % src: 触发的菜单按钮
 
-                else
-                    btn.Visible = 'off';
-                end
-            end
+            % 更新菜单状态
+            updateContextMenuState(app);
+
+            % 获取按钮的屏幕位置
+            btnPos = getpixelposition(src, true);
+            figPos = getpixelposition(app.UIFigure);
+
+            % 计算菜单显示位置（按钮下方）
+            menuX = figPos(1) + btnPos(1);
+            menuY = figPos(2) + btnPos(2);
+
+            % 显示上下文菜单
+            app.ImageContextMenu.Position = [menuX, menuY];
+            app.ImageContextMenu.Visible = 'on';
         end
 
     end
