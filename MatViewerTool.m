@@ -30,12 +30,6 @@ classdef MatViewerTool < matlab.apps.AppBase
         
         % 控制按钮
         ImportBtn               matlab.ui.control.Button
-        WaveformBtn             matlab.ui.control.Button
-        OriginalBtn             matlab.ui.control.Button
-        DbBtn                   matlab.ui.control.Button
-        Mesh3DBtn               matlab.ui.control.Button
-        DbMesh3DBtn             matlab.ui.control.Button
-        SARBtn                  matlab.ui.control.Button
         AutoPlayBtn             matlab.ui.control.Button
         ExportBtn               matlab.ui.control.Button
         
@@ -107,7 +101,24 @@ classdef MatViewerTool < matlab.apps.AppBase
         CloseBtn2               matlab.ui.control.Button  % 添加
         CloseBtn3               matlab.ui.control.Button  % 添加
         CloseBtn4               matlab.ui.control.Button  % 添加
-        MultiViewPanel          matlab.ui.container.Panel        
+        MultiViewPanel          matlab.ui.container.Panel
+
+        % 图像标题和菜单
+        TitleLabel1             matlab.ui.control.Label
+        TitleLabel2             matlab.ui.control.Label
+        TitleLabel3             matlab.ui.control.Label
+        TitleLabel4             matlab.ui.control.Label
+        MenuBtn1                matlab.ui.control.Button
+        MenuBtn2                matlab.ui.control.Button
+        MenuBtn3                matlab.ui.control.Button
+        MenuBtn4                matlab.ui.control.Button
+        ImageContextMenu        matlab.ui.container.ContextMenu
+        WaveformMenuItem        matlab.ui.container.Menu
+        OriginalMenuItem        matlab.ui.container.Menu
+        DbMenuItem              matlab.ui.container.Menu
+        Mesh3DMenuItem          matlab.ui.container.Menu
+        DbMesh3DMenuItem        matlab.ui.container.Menu
+        SARMenuItem             matlab.ui.container.Menu        
     end
     
     methods (Access = public)
@@ -475,61 +486,19 @@ classdef MatViewerTool < matlab.apps.AppBase
             imgLayout.RowSpacing = 3;
             
             % ========== 第1行：功能按钮 ==========
-            btnLayout1 = uigridlayout(imgLayout, [1, 8]);
-            btnLayout1.ColumnWidth = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', '1x'};
+            btnLayout1 = uigridlayout(imgLayout, [1, 2]);
+            btnLayout1.ColumnWidth = {'fit', '1x'};
             btnLayout1.Layout.Row = 1;
             btnLayout1.Layout.Column = 1;
             btnLayout1.Padding = [5 2 5 2];
             btnLayout1.ColumnSpacing = 3;
-            
+
             app.ImportBtn = uibutton(btnLayout1, 'push');
             app.ImportBtn.Text = '导入选中实验数据';
             app.ImportBtn.Layout.Row = 1;
             app.ImportBtn.Layout.Column = 1;
             app.ImportBtn.ButtonPushedFcn = @(~,~) importFiles(app);
-            
-            app.WaveformBtn = uibutton(btnLayout1, 'push');
-            app.WaveformBtn.Text = '时域波形图';
-            app.WaveformBtn.Enable = 'off';
-            app.WaveformBtn.Layout.Row = 1;
-            app.WaveformBtn.Layout.Column = 2;
-            app.WaveformBtn.ButtonPushedFcn = @(~,~) showTimeWaveform(app);
-            
-            app.OriginalBtn = uibutton(btnLayout1, 'push');
-            app.OriginalBtn.Text = '原图放大';
-            app.OriginalBtn.Enable = 'off';
-            app.OriginalBtn.Layout.Row = 1;
-            app.OriginalBtn.Layout.Column = 3;
-            app.OriginalBtn.ButtonPushedFcn = @(~,~) showOriginalImage(app);
-            
-            app.DbBtn = uibutton(btnLayout1, 'push');
-            app.DbBtn.Text = '原图dB放大';
-            app.DbBtn.Enable = 'off';
-            app.DbBtn.Layout.Row = 1;
-            app.DbBtn.Layout.Column = 4;
-            app.DbBtn.ButtonPushedFcn = @(~,~) showDbImage(app);
-            
-            app.Mesh3DBtn = uibutton(btnLayout1, 'push');
-            app.Mesh3DBtn.Text = '3D图像放大';
-            app.Mesh3DBtn.Enable = 'off';
-            app.Mesh3DBtn.Layout.Row = 1;
-            app.Mesh3DBtn.Layout.Column = 5;
-            app.Mesh3DBtn.ButtonPushedFcn = @(~,~) show3DMesh(app);
-            
-            app.DbMesh3DBtn = uibutton(btnLayout1, 'push');
-            app.DbMesh3DBtn.Text = '3D图像dB放大';
-            app.DbMesh3DBtn.Enable = 'off';
-            app.DbMesh3DBtn.Layout.Row = 1;
-            app.DbMesh3DBtn.Layout.Column = 6;
-            app.DbMesh3DBtn.ButtonPushedFcn = @(~,~) showDb3DMesh(app);
-            
-            app.SARBtn = uibutton(btnLayout1, 'push');
-            app.SARBtn.Text = 'SAR图';
-            app.SARBtn.Enable = 'off';
-            app.SARBtn.Layout.Row = 1;
-            app.SARBtn.Layout.Column = 7;
-            app.SARBtn.ButtonPushedFcn = @(~,~) showSARImage(app);
-        
+
             % 状态标签
             app.StatusLabel = uilabel(btnLayout1);
             app.StatusLabel.Text = '请选择具体实验';
@@ -537,7 +506,7 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.StatusLabel.FontWeight = 'bold';
             app.StatusLabel.HorizontalAlignment = 'right';
             app.StatusLabel.Layout.Row = 1;
-            app.StatusLabel.Layout.Column = 8;
+            app.StatusLabel.Layout.Column = 2;
             
             % ========== 第2行：预处理控制栏 ==========
             createPreprocessingControlBar(app, imgLayout);
@@ -654,7 +623,92 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.CloseBtn4.Visible = 'off';
             app.CloseBtn4.Tooltip = '关闭此视图';
             app.CloseBtn4.ButtonPushedFcn = createCallbackFcn(app, @(~,~)closeSubView(app, 4), true);
-            
+
+            % ⭐ 创建标题标签（浮动在图像上方）
+            % 标题1
+            app.TitleLabel1 = uilabel(app.MultiViewPanel);
+            app.TitleLabel1.Text = '原图';
+            app.TitleLabel1.FontSize = 12;
+            app.TitleLabel1.FontWeight = 'bold';
+            app.TitleLabel1.BackgroundColor = [1 1 1 0.85];
+            app.TitleLabel1.Position = [40 10 100 20];
+            app.TitleLabel1.Visible = 'off';
+
+            % 标题2
+            app.TitleLabel2 = uilabel(app.MultiViewPanel);
+            app.TitleLabel2.Text = '原图';
+            app.TitleLabel2.FontSize = 12;
+            app.TitleLabel2.FontWeight = 'bold';
+            app.TitleLabel2.BackgroundColor = [1 1 1 0.85];
+            app.TitleLabel2.Position = [40 10 100 20];
+            app.TitleLabel2.Visible = 'off';
+
+            % 标题3
+            app.TitleLabel3 = uilabel(app.MultiViewPanel);
+            app.TitleLabel3.Text = '原图';
+            app.TitleLabel3.FontSize = 12;
+            app.TitleLabel3.FontWeight = 'bold';
+            app.TitleLabel3.BackgroundColor = [1 1 1 0.85];
+            app.TitleLabel3.Position = [40 10 100 20];
+            app.TitleLabel3.Visible = 'off';
+
+            % 标题4
+            app.TitleLabel4 = uilabel(app.MultiViewPanel);
+            app.TitleLabel4.Text = '原图';
+            app.TitleLabel4.FontSize = 12;
+            app.TitleLabel4.FontWeight = 'bold';
+            app.TitleLabel4.BackgroundColor = [1 1 1 0.85];
+            app.TitleLabel4.Position = [40 10 100 20];
+            app.TitleLabel4.Visible = 'off';
+
+            % ⭐ 创建菜单按钮（浮动在标题前面）
+            % 菜单按钮1
+            app.MenuBtn1 = uibutton(app.MultiViewPanel, 'push');
+            app.MenuBtn1.Text = '【菜单】';
+            app.MenuBtn1.FontSize = 10;
+            app.MenuBtn1.FontWeight = 'bold';
+            app.MenuBtn1.BackgroundColor = [0.95 0.95 1];
+            app.MenuBtn1.FontColor = [0 0 0.8];
+            app.MenuBtn1.Position = [5 10 60 20];
+            app.MenuBtn1.Visible = 'off';
+            app.MenuBtn1.Tooltip = '显示图像操作菜单';
+
+            % 菜单按钮2
+            app.MenuBtn2 = uibutton(app.MultiViewPanel, 'push');
+            app.MenuBtn2.Text = '【菜单】';
+            app.MenuBtn2.FontSize = 10;
+            app.MenuBtn2.FontWeight = 'bold';
+            app.MenuBtn2.BackgroundColor = [0.95 0.95 1];
+            app.MenuBtn2.FontColor = [0 0 0.8];
+            app.MenuBtn2.Position = [5 10 60 20];
+            app.MenuBtn2.Visible = 'off';
+            app.MenuBtn2.Tooltip = '显示图像操作菜单';
+
+            % 菜单按钮3
+            app.MenuBtn3 = uibutton(app.MultiViewPanel, 'push');
+            app.MenuBtn3.Text = '【菜单】';
+            app.MenuBtn3.FontSize = 10;
+            app.MenuBtn3.FontWeight = 'bold';
+            app.MenuBtn3.BackgroundColor = [0.95 0.95 1];
+            app.MenuBtn3.FontColor = [0 0 0.8];
+            app.MenuBtn3.Position = [5 10 60 20];
+            app.MenuBtn3.Visible = 'off';
+            app.MenuBtn3.Tooltip = '显示图像操作菜单';
+
+            % 菜单按钮4
+            app.MenuBtn4 = uibutton(app.MultiViewPanel, 'push');
+            app.MenuBtn4.Text = '【菜单】';
+            app.MenuBtn4.FontSize = 10;
+            app.MenuBtn4.FontWeight = 'bold';
+            app.MenuBtn4.BackgroundColor = [0.95 0.95 1];
+            app.MenuBtn4.FontColor = [0 0 0.8];
+            app.MenuBtn4.Position = [5 10 60 20];
+            app.MenuBtn4.Visible = 'off';
+            app.MenuBtn4.Tooltip = '显示图像操作菜单';
+
+            % 创建上下文菜单（后面会关联到菜单按钮）
+            createImageContextMenu(app);
+
             % 监听面板大小变化，动态调整按钮位置
             app.MultiViewPanel.SizeChangedFcn = createCallbackFcn(app, @(src, event)updateCloseButtonPositions(app), true);
             
@@ -821,6 +875,50 @@ classdef MatViewerTool < matlab.apps.AppBase
             app.NextBtn.Layout.Row = 1;
             app.NextBtn.Layout.Column = 3;
             app.NextBtn.ButtonPushedFcn = @(~,~) gotoNextFrame(app);
+        end
+
+        function createImageContextMenu(app)
+            % 创建图像上下文菜单（包含六个功能选项）
+
+            % 创建上下文菜单
+            app.ImageContextMenu = uicontextmenu(app.UIFigure);
+
+            % 创建菜单项
+            app.WaveformMenuItem = uimenu(app.ImageContextMenu);
+            app.WaveformMenuItem.Text = '时域波形图';
+            app.WaveformMenuItem.Enable = 'off';
+            app.WaveformMenuItem.MenuSelectedFcn = @(~,~) showTimeWaveform(app);
+
+            app.OriginalMenuItem = uimenu(app.ImageContextMenu);
+            app.OriginalMenuItem.Text = '原图放大';
+            app.OriginalMenuItem.Enable = 'off';
+            app.OriginalMenuItem.MenuSelectedFcn = @(~,~) showOriginalImage(app);
+
+            app.DbMenuItem = uimenu(app.ImageContextMenu);
+            app.DbMenuItem.Text = '原图dB放大';
+            app.DbMenuItem.Enable = 'off';
+            app.DbMenuItem.MenuSelectedFcn = @(~,~) showDbImage(app);
+
+            app.Mesh3DMenuItem = uimenu(app.ImageContextMenu);
+            app.Mesh3DMenuItem.Text = '3D图像放大';
+            app.Mesh3DMenuItem.Enable = 'off';
+            app.Mesh3DMenuItem.MenuSelectedFcn = @(~,~) show3DMesh(app);
+
+            app.DbMesh3DMenuItem = uimenu(app.ImageContextMenu);
+            app.DbMesh3DMenuItem.Text = '3D图像dB放大';
+            app.DbMesh3DMenuItem.Enable = 'off';
+            app.DbMesh3DMenuItem.MenuSelectedFcn = @(~,~) showDb3DMesh(app);
+
+            app.SARMenuItem = uimenu(app.ImageContextMenu);
+            app.SARMenuItem.Text = 'SAR图';
+            app.SARMenuItem.Enable = 'off';
+            app.SARMenuItem.MenuSelectedFcn = @(~,~) showSARImage(app);
+
+            % 将菜单关联到菜单按钮（点击按钮时显示菜单）
+            app.MenuBtn1.ButtonPushedFcn = @(src,~) showContextMenuAtButton(app, src, 1);
+            app.MenuBtn2.ButtonPushedFcn = @(src,~) showContextMenuAtButton(app, src, 2);
+            app.MenuBtn3.ButtonPushedFcn = @(src,~) showContextMenuAtButton(app, src, 3);
+            app.MenuBtn4.ButtonPushedFcn = @(src,~) showContextMenuAtButton(app, src, 4);
         end
 
         function createPreprocessingControlBar(app, parentLayout)
@@ -2299,53 +2397,53 @@ classdef MatViewerTool < matlab.apps.AppBase
         end
         
         function updateDisplayButtonsState(app)
-            % 根据当前帧数据类型更新按钮状态
+            % 根据当前帧数据类型更新菜单项状态
             if isempty(app.MatData) || app.CurrentIndex > length(app.MatData)
-                % 没有数据时，所有按钮禁用
-                app.WaveformBtn.Enable = 'off';
-                app.OriginalBtn.Enable = 'off';
-                app.DbBtn.Enable = 'off';
-                app.Mesh3DBtn.Enable = 'off';
-                app.DbMesh3DBtn.Enable = 'off';
-                app.SARBtn.Enable = 'off';
+                % 没有数据时，所有菜单项禁用
+                app.WaveformMenuItem.Enable = 'off';
+                app.OriginalMenuItem.Enable = 'off';
+                app.DbMenuItem.Enable = 'off';
+                app.Mesh3DMenuItem.Enable = 'off';
+                app.DbMesh3DMenuItem.Enable = 'off';
+                app.SARMenuItem.Enable = 'off';
                 return;
             end
-            
+
             % 判断文件名是否为SAR
             [~, filename] = fileparts(app.MatFiles{app.CurrentIndex});
             isSAR = startsWith(lower(filename), 'sar');
-            
+
             % 获取当前矩阵
             data = app.MatData{app.CurrentIndex};
             complexMatrix = data.complex_matrix;
             isVector = isvector(complexMatrix);
-            
+
             if isSAR
-                % ===== 第一类：SAR文件 - 只有SAR图按钮可用 =====
-                app.WaveformBtn.Enable = 'off';
-                app.OriginalBtn.Enable = 'off';
-                app.DbBtn.Enable = 'off';
-                app.Mesh3DBtn.Enable = 'off';
-                app.DbMesh3DBtn.Enable = 'off';
-                app.SARBtn.Enable = 'on';
-                
+                % ===== 第一类：SAR文件 - 只有SAR图菜单项可用 =====
+                app.WaveformMenuItem.Enable = 'off';
+                app.OriginalMenuItem.Enable = 'off';
+                app.DbMenuItem.Enable = 'off';
+                app.Mesh3DMenuItem.Enable = 'off';
+                app.DbMesh3DMenuItem.Enable = 'off';
+                app.SARMenuItem.Enable = 'on';
+
             elseif isVector
                 % ===== 第二类：向量数据 - 只有时域波形图可用 =====
-                app.WaveformBtn.Enable = 'on';
-                app.OriginalBtn.Enable = 'off';
-                app.DbBtn.Enable = 'off';
-                app.Mesh3DBtn.Enable = 'off';
-                app.DbMesh3DBtn.Enable = 'off';
-                app.SARBtn.Enable = 'off';
-                
+                app.WaveformMenuItem.Enable = 'on';
+                app.OriginalMenuItem.Enable = 'off';
+                app.DbMenuItem.Enable = 'off';
+                app.Mesh3DMenuItem.Enable = 'off';
+                app.DbMesh3DMenuItem.Enable = 'off';
+                app.SARMenuItem.Enable = 'off';
+
             else
-                % ===== 第三类：矩阵数据 - 原图和3D按钮可用 =====
-                app.WaveformBtn.Enable = 'off';
-                app.OriginalBtn.Enable = 'on';
-                app.DbBtn.Enable = 'on';
-                app.Mesh3DBtn.Enable = 'on';
-                app.DbMesh3DBtn.Enable = 'on';
-                app.SARBtn.Enable = 'off';
+                % ===== 第三类：矩阵数据 - 原图和3D菜单项可用 =====
+                app.WaveformMenuItem.Enable = 'off';
+                app.OriginalMenuItem.Enable = 'on';
+                app.DbMenuItem.Enable = 'on';
+                app.Mesh3DMenuItem.Enable = 'on';
+                app.DbMesh3DMenuItem.Enable = 'on';
+                app.SARMenuItem.Enable = 'off';
             end
         end
         
@@ -5501,20 +5599,10 @@ classdef MatViewerTool < matlab.apps.AppBase
                 complexMatrix = data.complex_matrix;
                 displayDefaultImage(app, ax, complexMatrix, titleStr);
             end
-            % 设置标题功能
-            if viewIndex == 1
-                % 原图：普通标题
-                title(ax, titleStr, 'FontSize', 10, 'Interpreter', 'none');
-            else
-                % 预处理视图：添加关闭功能
-                titleStr = sprintf('%s  [关闭×]', titleStr);
-                t = title(ax, titleStr, 'FontSize', 10, 'Interpreter', 'none');
-                
-                % 标题文本添加点击事件
-                t.ButtonDownFcn = @(~,~)closeSubView(app, viewIndex);
-                
-                % 改变鼠标指针为手型（提示可点击）
-                ax.ButtonDownFcn = @(~,~)closeSubView(app, viewIndex);
+            % 更新对应的标题标签
+            titleLabelList = {app.TitleLabel1, app.TitleLabel2, app.TitleLabel3, app.TitleLabel4};
+            if viewIndex >= 1 && viewIndex <= 4
+                titleLabelList{viewIndex}.Text = titleStr;
             end
         end
 
@@ -6251,33 +6339,33 @@ classdef MatViewerTool < matlab.apps.AppBase
 
         function updateCloseButtonPositions(app)
             % 动态更新关闭按钮的位置（根据 UIAxes 的位置）
-            
+
             % 如果按钮不存在，直接返回
             if ~isvalid(app.CloseBtn2) || ~isvalid(app.CloseBtn3) || ~isvalid(app.CloseBtn4)
                 return;
             end
-            
+
             % 定义按钮大小
             btnWidth = 10;
             btnHeight = 10;
             margin = 5;  % 距离坐标轴右上角的距离
-            
+
             % 为每个可见的 Axes 计算按钮位置
             axesList = {app.ImageAxes2, app.ImageAxes3, app.ImageAxes4};
             btnList = {app.CloseBtn2, app.CloseBtn3, app.CloseBtn4};
-            
+
             for i = 1:3
                 ax = axesList{i};
                 btn = btnList{i};
-                
+
                 if strcmp(ax.Visible, 'on')
                     % 获取坐标轴在面板中的像素位置
                     axPos = getpixelposition(ax, true);  % 相对于父容器
-                    
+
                     % 计算按钮位置（右上角）
                     btnX = axPos(1) + axPos(3) - btnWidth - margin;
                     btnY = axPos(2) + axPos(4) - btnHeight - margin;
-                    
+
                     btn.Position = [btnX, btnY, btnWidth, btnHeight];
                     btn.Visible = 'on';
                     % 将按钮提到最前面（确保不被 GridLayout 遮挡）
@@ -6286,6 +6374,135 @@ classdef MatViewerTool < matlab.apps.AppBase
                 else
                     btn.Visible = 'off';
                 end
+            end
+
+            % 同时更新标题和菜单按钮的位置
+            updateMenuButtonPositions(app);
+        end
+
+        function updateMenuButtonPositions(app)
+            % 动态更新标题标签和菜单按钮的位置（根据 UIAxes 的位置）
+
+            % 如果组件不存在，直接返回
+            if ~isvalid(app.MenuBtn1) || ~isvalid(app.TitleLabel1)
+                return;
+            end
+
+            % 定义按钮和标签的尺寸
+            menuBtnWidth = 60;
+            menuBtnHeight = 20;
+            titleLabelWidth = 100;
+            titleLabelHeight = 20;
+            margin = 5;  % 距离坐标轴边缘的距离
+
+            % 为每个可见的 Axes 计算标题和菜单按钮位置
+            axesList = {app.ImageAxes1, app.ImageAxes2, app.ImageAxes3, app.ImageAxes4};
+            menuBtnList = {app.MenuBtn1, app.MenuBtn2, app.MenuBtn3, app.MenuBtn4};
+            titleLabelList = {app.TitleLabel1, app.TitleLabel2, app.TitleLabel3, app.TitleLabel4};
+
+            for i = 1:4
+                ax = axesList{i};
+                menuBtn = menuBtnList{i};
+                titleLabel = titleLabelList{i};
+
+                if strcmp(ax.Visible, 'on')
+                    % 获取坐标轴在面板中的像素位置
+                    axPos = getpixelposition(ax, true);  % 相对于父容器
+
+                    % 计算菜单按钮位置（左上角）
+                    menuBtnX = axPos(1) + margin;
+                    menuBtnY = axPos(2) + axPos(4) - menuBtnHeight - margin;
+
+                    menuBtn.Position = [menuBtnX, menuBtnY, menuBtnWidth, menuBtnHeight];
+                    menuBtn.Visible = 'on';
+
+                    % 计算标题标签位置（菜单按钮右边）
+                    titleLabelX = menuBtnX + menuBtnWidth + 5;
+                    titleLabelY = menuBtnY;
+
+                    titleLabel.Position = [titleLabelX, titleLabelY, titleLabelWidth, titleLabelHeight];
+                    titleLabel.Visible = 'on';
+                else
+                    menuBtn.Visible = 'off';
+                    titleLabel.Visible = 'off';
+                end
+            end
+        end
+
+        function showContextMenuAtButton(app, buttonSrc, axesIndex)
+            % 在菜单按钮位置显示功能选项（使用小型对话框）
+            % buttonSrc: 触发的按钮
+            % axesIndex: 对应的坐标轴索引
+
+            % 获取按钮在屏幕上的位置（相对于屏幕）
+            figPos = app.UIFigure.Position;
+            btnPos = getpixelposition(buttonSrc, true);
+            panelPos = getpixelposition(app.MultiViewPanel, true);
+
+            % 计算对话框位置（在按钮下方）
+            % 需要将按钮的相对位置转换为屏幕绝对位置
+            dlgX = figPos(1) + btnPos(1);
+            dlgY = figPos(2) + figPos(4) - btnPos(2) - 20;
+
+            % 创建小型菜单对话框
+            dlg = uifigure('Name', '图像操作', ...
+                'Position', [dlgX, dlgY-200, 150, 200], ...
+                'WindowStyle', 'alwaysontop', ...
+                'Resize', 'off');
+
+            % 创建垂直布局
+            layout = uigridlayout(dlg, [6, 1]);
+            layout.RowHeight = repmat({30}, 1, 6);
+            layout.Padding = [5 5 5 5];
+            layout.RowSpacing = 2;
+
+            % 创建六个菜单按钮
+            btn1 = uibutton(layout, 'push');
+            btn1.Text = '时域波形图';
+            btn1.Layout.Row = 1;
+            btn1.Layout.Column = 1;
+            btn1.Enable = app.WaveformMenuItem.Enable;
+            btn1.ButtonPushedFcn = @(~,~) closeAndExecute(dlg, @() showTimeWaveform(app));
+
+            btn2 = uibutton(layout, 'push');
+            btn2.Text = '原图放大';
+            btn2.Layout.Row = 2;
+            btn2.Layout.Column = 1;
+            btn2.Enable = app.OriginalMenuItem.Enable;
+            btn2.ButtonPushedFcn = @(~,~) closeAndExecute(dlg, @() showOriginalImage(app));
+
+            btn3 = uibutton(layout, 'push');
+            btn3.Text = '原图dB放大';
+            btn3.Layout.Row = 3;
+            btn3.Layout.Column = 1;
+            btn3.Enable = app.DbMenuItem.Enable;
+            btn3.ButtonPushedFcn = @(~,~) closeAndExecute(dlg, @() showDbImage(app));
+
+            btn4 = uibutton(layout, 'push');
+            btn4.Text = '3D图像放大';
+            btn4.Layout.Row = 4;
+            btn4.Layout.Column = 1;
+            btn4.Enable = app.Mesh3DMenuItem.Enable;
+            btn4.ButtonPushedFcn = @(~,~) closeAndExecute(dlg, @() show3DMesh(app));
+
+            btn5 = uibutton(layout, 'push');
+            btn5.Text = '3D图像dB放大';
+            btn5.Layout.Row = 5;
+            btn5.Layout.Column = 1;
+            btn5.Enable = app.DbMesh3DMenuItem.Enable;
+            btn5.ButtonPushedFcn = @(~,~) closeAndExecute(dlg, @() showDb3DMesh(app));
+
+            btn6 = uibutton(layout, 'push');
+            btn6.Text = 'SAR图';
+            btn6.Layout.Row = 6;
+            btn6.Layout.Column = 1;
+            btn6.Enable = app.SARMenuItem.Enable;
+            btn6.ButtonPushedFcn = @(~,~) closeAndExecute(dlg, @() showSARImage(app));
+
+            % 辅助函数：关闭对话框并执行操作
+            function closeAndExecute(dialog, func)
+                close(dialog);
+                func();
             end
         end
 
