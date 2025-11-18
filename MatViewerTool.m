@@ -571,8 +571,8 @@ classdef MatViewerTool < matlab.apps.AppBase
             titleBar1.BackgroundColor = [0.94 0.94 0.94];
 
             app.MenuBtn1 = uibutton(titleBar1, 'push');
-            app.MenuBtn1.Text = '☰';
-            app.MenuBtn1.FontSize = 12;
+            app.MenuBtn1.Text = '【菜单】';
+            app.MenuBtn1.FontSize = 11;
             app.MenuBtn1.FontWeight = 'bold';
             app.MenuBtn1.BackgroundColor = [0.3 0.6 0.9];
             app.MenuBtn1.FontColor = [1 1 1];
@@ -618,8 +618,8 @@ classdef MatViewerTool < matlab.apps.AppBase
             titleBar2.BackgroundColor = [0.94 0.94 0.94];
 
             app.MenuBtn2 = uibutton(titleBar2, 'push');
-            app.MenuBtn2.Text = '☰';
-            app.MenuBtn2.FontSize = 12;
+            app.MenuBtn2.Text = '【菜单】';
+            app.MenuBtn2.FontSize = 11;
             app.MenuBtn2.FontWeight = 'bold';
             app.MenuBtn2.BackgroundColor = [0.3 0.6 0.9];
             app.MenuBtn2.FontColor = [1 1 1];
@@ -676,8 +676,8 @@ classdef MatViewerTool < matlab.apps.AppBase
             titleBar3.BackgroundColor = [0.94 0.94 0.94];
 
             app.MenuBtn3 = uibutton(titleBar3, 'push');
-            app.MenuBtn3.Text = '☰';
-            app.MenuBtn3.FontSize = 12;
+            app.MenuBtn3.Text = '【菜单】';
+            app.MenuBtn3.FontSize = 11;
             app.MenuBtn3.FontWeight = 'bold';
             app.MenuBtn3.BackgroundColor = [0.3 0.6 0.9];
             app.MenuBtn3.FontColor = [1 1 1];
@@ -734,8 +734,8 @@ classdef MatViewerTool < matlab.apps.AppBase
             titleBar4.BackgroundColor = [0.94 0.94 0.94];
 
             app.MenuBtn4 = uibutton(titleBar4, 'push');
-            app.MenuBtn4.Text = '☰';
-            app.MenuBtn4.FontSize = 12;
+            app.MenuBtn4.Text = '【菜单】';
+            app.MenuBtn4.FontSize = 11;
             app.MenuBtn4.FontWeight = 'bold';
             app.MenuBtn4.BackgroundColor = [0.3 0.6 0.9];
             app.MenuBtn4.FontColor = [1 1 1];
